@@ -206,6 +206,7 @@ while True:
 
     except KeyboardInterrupt: # ctrl-c
         send_crtlc = True
+        continue
 
     except EOFError: # ctrl-d (from session.prompt())
         event_exit.set()

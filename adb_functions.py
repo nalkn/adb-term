@@ -12,7 +12,7 @@ import logging
 from subprocess import run
 import zipfile
 
-from data.keyevents import KeyMap
+from keyevents import KeyMap
 
 
 # define constants
