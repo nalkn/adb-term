@@ -23,8 +23,8 @@ from config import env_file_path, check_dependencies_groups
 current_dir_path = os.path.dirname(__file__)
 
 apks_folder_path = os.path.join(current_dir_path, "apks")
-device_downloads_path = "/storage/emulated/0/Download/" # refers to the termux internal storage : "~/storage/downloads/"
-pc_downloads_path = os.path.join(current_dir_path, "adb-downloads")
+device_downloads_dir = "/storage/emulated/0/Download/" # refers to the termux internal storage : "~/storage/downloads/"
+pc_downloads_dir = os.path.join(current_dir_path, "adb-downloads")
 
 conf_path = os.path.join(current_dir_path, "data", "adb_term_conf.json")
 log_path = os.path.join(current_dir_path, "data", "adb_term.log")
@@ -206,7 +206,6 @@ while True:
 
     except KeyboardInterrupt: # ctrl-c
         send_crtlc = True
-        continue
 
     except EOFError: # ctrl-d (from session.prompt())
         event_exit.set()
@@ -310,7 +309,9 @@ while True:
 
             # check if the package is already installed
             replace_apk = False
-            apk_id = extract_apk_id(apk_files[1] if len(apk_files) > 1 else apk_files[0])
+            try: apk_id = extract_apk_id(apk_files[1] if len(apk_files) > 1 else apk_files[0])
+            except: apk_id = None
+            
             if (apk_id is not None) and (apk_id in adb_list_packages()):
                 print("[!] This apk is already installed on device")
                 if input("[?] Install the new apk without erasing old apk data (-> apk update) ? [y/n] ") in ["y", "yes"]:
@@ -364,9 +365,10 @@ while True:
             continue
 
         # choose trg path
-        print(f"[*] By default, push path to \"{device_downloads_path}\"")
-        try: trg_path = input("[?] New target path (empty=default): ") or device_downloads_path
+        print(f"[*] By default, push path to \"{device_downloads_dir}\"")
+        try: trg_dir = input("[?] New target path (empty=default): ") or device_downloads_dir
         except KeyboardInterrupt: continue
+        trg_path = os.path.join(trg_dir, os.path.basename(src_path))
 
         # send file
         print(f"[*] pushing '{src_path}' to the device")
@@ -379,20 +381,21 @@ while True:
     # pull files
     elif cmd.startswith(".pull "):
         # choose trg path
-        print(f"[*] By default, path are pulled from \"{device_downloads_path}\"")
-        try: src_device = input("[?] New source path (empty=default): ") or device_downloads_path
+        print(f"[*] By default, path are pulled from \"{device_downloads_dir}\"")
+        try: src_device = input("[?] New source path (empty=default): ") or device_downloads_dir
         except KeyboardInterrupt: continue
 
         # get file / dir
         src_path = os.path.join(src_device, cmd.split(".pull ")[1])
+        pc_downloads_path = os.path.join(pc_downloads_dir, os.path.basename(src_path))
 
         # check download dir
-        if not os.path.exists(pc_downloads_path):
-            os.mkdir(pc_downloads_path)
+        if not os.path.exists(pc_downloads_dir):
+            os.mkdir(pc_downloads_dir)
 
         # pull file
         print(f"[*] pulling '{src_path}' from the device")
-        if adb_pull_path(src_path, device_downloads_path):
+        if adb_pull_path(src_path, pc_downloads_path):
             print(f"[+] path pulled to {pc_downloads_path}")
         else:
             print("[-] pull of path failed")

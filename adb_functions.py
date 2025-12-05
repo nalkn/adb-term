@@ -177,7 +177,9 @@ def adb_install_apk(apk_files:list, replace_apk=False, allow_downgrade=False):
     for apk_file in apk_files:
         apk_ext = os.path.splitext(apk_file)[1]
         if apk_ext != ".apk":
-            raise ValueError(f"apk format (.{apk_ext}) is not supported !")
+            raise ValueError(f"apk format (.{apk_ext}) is not supported with adb !")
+
+#    apk_files = [f for f in apk_files if ("v7a" in f) or ("base" in f)]
 
     # Create install command
     if len(apk_files) > 1:
