@@ -206,7 +206,7 @@ def extract_apk_id(apk_path:str):
 
     # extract package id from stdout
     id_chrs_before, id_chrs_after = result.stdout.find("package: name='"), result.stdout.find("' versionCode=")
-    package_id = result.stdout[id_chrs_before+len(chrs_before):id_chrs_after]
+    package_id = result.stdout[id_chrs_before+15:id_chrs_after]
 
     return package_id
 
