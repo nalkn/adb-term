@@ -102,7 +102,7 @@ def check_conn():
     return f"{_conf['ip']}:{_conf['port']}" in get_connected_devices()
 
 
-def adb_sh_cmd(command:list, get_result=False):
+def adb_shell_cmd(command:list, get_result=False):
     """Execute a command in the adb shell on a connected adb device"""
 
     return exec_cmd(cmd_adb_device() + ["shell"] + command, get_result)
@@ -111,7 +111,7 @@ def adb_sh_cmd(command:list, get_result=False):
 def adb_send_text(command:str):
     """Send text input to a connected adb device"""
     
-    return exec_cmd(cmd_adb_device() + ["shell", "input", "text", f"'{command}'"]) # send command (with spaces into)
+    return adb_shell_cmd(["input", "text", f"'{command}'"]) # send command (with spaces into)
 
 
 def adb_send_key(*keyevents:str, keycombination=False):
@@ -124,7 +124,7 @@ def adb_send_key(*keyevents:str, keycombination=False):
     else:
         sendkeys_mode = "keyevent"
     
-    return exec_cmd(cmd_adb_device() + ["shell", "input", sendkeys_mode, *keyevents])
+    return adb_shell_cmd(["input", sendkeys_mode, *keyevents])
 
 
 def adb_send_cmd(command:str):
@@ -135,7 +135,7 @@ def adb_send_cmd(command:str):
 
 def _extract_apkm_or_xapk(apkm_xapk_path:str) -> list:
     """Extract .apk files from .apkm file"""
-    # https://github.com/veryraregaming/Rares-Apkm-to-APK-GUI
+    # thanks to : https://github.com/veryraregaming/Rares-Apkm-to-APK-GUI
 
     basename_apkm_xapk = os.path.splitext(os.path.basename(apkm_xapk_path))[0]
     _log.info(f"extracting {os.path.splitext(apkm_xapk_path)[1]} file '{basename_apkm_xapk}' to .apk files")
@@ -205,8 +205,7 @@ def extract_apk_id(apk_path:str):
         return None
 
     # extract package id from stdout
-    chrs_before, chrs_after = "package: name='", "' versionCode="
-    id_chrs_before, id_chrs_after = result.stdout.find(chrs_before), result.stdout.find(chrs_after)
+    id_chrs_before, id_chrs_after = result.stdout.find("package: name='"), result.stdout.find("' versionCode=")
     package_id = result.stdout[id_chrs_before+len(chrs_before):id_chrs_after]
 
     return package_id
@@ -216,7 +215,7 @@ def adb_list_packages():
     """List all packages of a connected adb device"""
 
     # get installed packages
-    _packages_id = adb_sh_cmd(["pm", "list", "packages"], True)
+    _packages_id = adb_shell_cmd(["pm", "list", "packages"], True)
 
     # check returncode
     if _packages_id.returncode != 0:
@@ -245,4 +244,4 @@ def adb_pull_path(src:str, trg:str):
 def adb_disable_dev_opts():
     """Disable the dev options on a connected adb device"""
 
-    return exec_cmd(cmd_adb_device() + ["shell", "settings", "put", "global", "development_settings_enabled", "0"])
+    return adb_shell_cmd(["settings", "put", "global", "development_settings_enabled", "0"])

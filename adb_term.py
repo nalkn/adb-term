@@ -311,7 +311,7 @@ while True:
             replace_apk = False
             try: apk_id = extract_apk_id(apk_files[1] if len(apk_files) > 1 else apk_files[0])
             except: apk_id = None
-            
+
             if (apk_id is not None) and (apk_id in adb_list_packages()):
                 print("[!] This apk is already installed on device")
                 if input("[?] Install the new apk without erasing old apk data (-> apk update) ? [y/n] ") in ["y", "yes"]:
