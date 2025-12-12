@@ -8,6 +8,7 @@
 
 # imports
 import os
+import sys
 import logging
 from subprocess import run
 import zipfile
@@ -48,13 +49,27 @@ def adb_fncts_set_conf(conf):
     _conf = conf
 
 
+def _get_encoding():
+    """Return correct subprocess encoding for a platform"""
+
+    if sys.platform == "win32":
+        return "cp437"
+    else:
+        return "utf-8"
+
 def exec_cmd(command:list, get_result=False, nolog=False):
     """Executes a command and returns whether it was executed successfully (or its result)."""
 
     if not nolog:
         _log.info(f"exec {command}")
 
-    result = run(command, capture_output=True, text=True) # old : call(command, stdout=DEVNULL, stderr=STDOUT) == 0
+    result = run(
+        command, 
+        encoding=_get_encoding(),
+        text=True,
+        capture_output=True
+    )
+
     if get_result:
         return result
     else:
