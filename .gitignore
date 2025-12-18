@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+
+.env
+.temp/
+apks/
+tools/
+scripts/
+
+data/adb_term.log
+data/adb_term_conf.json
+adb-downloads/
